@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DemonicScans – Easy Account Switcher
 // @namespace    https://demonicscans.org/
-// @version      1.0.2
+// @version      1.0.3
 // @description  Floating draggable account switcher window on DemonicScans. Credentials are saved locally on your machine.
 // @author       You
 // @match        https://demonicscans.org/*
@@ -31,6 +31,17 @@
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function maskEmail(email) {
+    if (!email) return '';
+    const parts = email.split('@');
+    if (parts.length !== 2) return email;
+    const [user, domain] = parts;
+    if (user.length <= 3) {
+      return user + '***@' + domain;
+    }
+    return user.substring(0, 3) + '***@' + domain;
   }
 
   // ── Styles ───────────────────────────────────────────────────────────────────
@@ -297,7 +308,8 @@
       if (delBtn) {
         const list = getAccounts();
         const i = +delBtn.dataset.i;
-        if (confirm(`Remove "${list[i].label}"?`)) {
+        const labelToConfirm = list[i].label && list[i].label !== list[i].email ? list[i].label : maskEmail(list[i].email);
+        if (confirm(`Remove "${labelToConfirm}"?`)) {
           list.splice(i, 1);
           saveAccounts(list);
           renderList();
@@ -317,17 +329,21 @@
       ul.innerHTML = '<li class="ds-acct-empty">No accounts saved yet.</li>';
       return;
     }
-    ul.innerHTML = accounts.map((a, i) => `
-      <li class="ds-acct-item">
-        <div class="ds-acct-avatar">${esc((a.label || a.email).charAt(0).toUpperCase())}</div>
-        <div class="ds-acct-info">
-          <span class="ds-acct-name">${esc(a.label || a.email)}</span>
-          <span class="ds-acct-user">${esc(a.email || a.username || '')}</span>
-        </div>
-        <button class="ds-use-btn" data-i="${i}">Use</button>
-        <button class="ds-del-btn" data-i="${i}" title="Remove">✕</button>
-      </li>
-    `).join('');
+    ul.innerHTML = accounts.map((a, i) => {
+      const displayName = a.label && a.label !== a.email ? a.label : maskEmail(a.email);
+      const displayEmail = maskEmail(a.email || a.username || '');
+      return `
+        <li class="ds-acct-item">
+          <div class="ds-acct-avatar">${esc((a.label || a.email).charAt(0).toUpperCase())}</div>
+          <div class="ds-acct-info">
+            <span class="ds-acct-name">${esc(displayName)}</span>
+            <span class="ds-acct-user">${esc(displayEmail)}</span>
+          </div>
+          <button class="ds-use-btn" data-i="${i}">Use</button>
+          <button class="ds-del-btn" data-i="${i}" title="Remove">✕</button>
+        </li>
+      `;
+    }).join('');
   }
 
   // ── Drag ─────────────────────────────────────────────────────────────────────
@@ -410,7 +426,7 @@
 
   // ── Native Form UI Automation Orchestration ─────────────────────────────────
   function executeActionPipeline(acct) {
-    const accountLabel = acct.label || acct.email;
+    const accountLabel = acct.label && acct.label !== acct.email ? acct.label : maskEmail(acct.email);
 
     // 1. Render persistent layered layout overlay immediately over the page
     const overlay = document.createElement('div');
