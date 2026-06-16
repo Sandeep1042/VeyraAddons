@@ -1,13 +1,15 @@
 // ==UserScript==
 // @name         DemonicScans – Easy Account Switcher
 // @namespace    https://demonicscans.org/
-// @version      1.0.1
-// @description  Floating draggable account switcher window on DemonicScans and make switching of account easier the credetial get stored in your local machine (phone or laptop)
+// @version      1.0.2
+// @description  Floating draggable account switcher window on DemonicScans. Credentials are saved locally on your machine.
 // @author       You
 // @match        https://demonicscans.org/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-idle
+// @updateURL    https://raw.githubusercontent.com/Sandeep1042/VeyraAddons/main/Account%20Switcher/accountSwitch.user.js
+// @downloadURL  https://raw.githubusercontent.com/Sandeep1042/VeyraAddons/main/Account%20Switcher/accountSwitch.user.js
 // ==/UserScript==
 
 (function () {
