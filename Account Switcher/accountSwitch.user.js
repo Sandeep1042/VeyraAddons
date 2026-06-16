@@ -156,6 +156,15 @@
       .ds-add-btn:hover { background: #c73350; }
       .ds-note { font-size: 10px; color: #444; margin: 4px 0 0; }
 
+      .ds-password-wrapper { position: relative; width: 100%; }
+      .ds-password-wrapper .ds-input { padding-right: 30px; }
+      .ds-password-toggle {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; padding: 0; cursor: pointer; color: #888;
+        display: flex; align-items: center; justify-content: center; transition: color 0.15s;
+      }
+      .ds-password-toggle:hover { color: #e94560; }
+
       /* ── Blue Layered Processing Overlay ── */
       .ds-layered-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -212,7 +221,12 @@
           <p class="ds-add-title">Add account</p>
           <input id="ds-new-label"    class="ds-input" placeholder="Label (e.g. Alt)" autocomplete="off" />
           <input id="ds-new-email"    class="ds-input" placeholder="Email address" type="email" autocomplete="off" />
-          <input id="ds-new-password" class="ds-input" type="password" placeholder="Password" />
+          <div class="ds-password-wrapper">
+            <input id="ds-new-password" class="ds-input" type="password" placeholder="Password" />
+            <button id="ds-toggle-pass" type="button" class="ds-password-toggle" title="Show password" style="display: none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
           <button class="ds-add-btn" id="ds-add-btn">Add</button>
           <p class="ds-note">Stored locally in Tampermonkey only.</p>
         </div>
@@ -232,17 +246,44 @@
       win.classList.add('ds-hidden');
     });
 
+    const newPassInput = win.querySelector('#ds-new-password');
+    const togglePassBtn = win.querySelector('#ds-toggle-pass');
+
+    newPassInput.addEventListener('input', () => {
+      if (newPassInput.value.length > 0) {
+        togglePassBtn.style.display = 'flex';
+      } else {
+        togglePassBtn.style.display = 'none';
+      }
+    });
+
+    togglePassBtn.addEventListener('click', () => {
+      if (newPassInput.type === 'password') {
+        newPassInput.type = 'text';
+        togglePassBtn.title = 'Hide password';
+        togglePassBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+      } else {
+        newPassInput.type = 'password';
+        togglePassBtn.title = 'Show password';
+        togglePassBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+      }
+    });
+
     win.querySelector('#ds-add-btn').addEventListener('click', () => {
       const label = win.querySelector('#ds-new-label').value.trim();
       const email = win.querySelector('#ds-new-email').value.trim();
-      const password = win.querySelector('#ds-new-password').value;
+      const password = newPassInput.value;
       if (!email) { alert('Email is required.'); return; }
       const list = getAccounts();
       list.push({ label: label || email, email, password });
       saveAccounts(list);
       win.querySelector('#ds-new-label').value = '';
       win.querySelector('#ds-new-email').value = '';
-      win.querySelector('#ds-new-password').value = '';
+      newPassInput.value = '';
+      newPassInput.type = 'password';
+      togglePassBtn.style.display = 'none';
+      togglePassBtn.title = 'Show password';
+      togglePassBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
       renderList();
     });
 
