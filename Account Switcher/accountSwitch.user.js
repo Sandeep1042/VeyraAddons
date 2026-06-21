@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         DemonicScans – Easy Account Switcher
 // @namespace    https://demonicscans.org/
-// @version      1.0.3
+// @version      1.0.4
 // @description  Floating draggable account switcher window on DemonicScans. Credentials are saved locally on your machine.
-// @author       You
+// @author       Sandeep1042
 // @match        https://demonicscans.org/*
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -50,24 +50,7 @@
     const s = document.createElement('style');
     s.id = 'ds-float-styles';
     s.textContent = `
-      /* ── Sidebar trigger button – matches Battle Pass style ── */
-      .ds-sidebar-btn {
-        display: flex; align-items: center; gap: 10px;
-        width: calc(100% - 20px); margin: 4px 10px;
-        padding: 9px 12px; border: none; border-radius: 10px;
-        background: rgba(255,255,255,0.06);
-        color: #e8e8f0;
-        font-size: 14px; font-family: inherit; font-weight: 500;
-        cursor: pointer; text-align: left;
-        transition: background 0.15s;
-      }
-      .ds-sidebar-btn:hover { background: rgba(255,255,255,0.11); }
-      .ds-sidebar-btn-icon {
-        width: 24px; height: 24px; border-radius: 6px;
-        background: #e94560;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
-      }
+      /* ── Sidebar trigger button divider ── */
       .ds-sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 12px; }
 
       /* ── Floating window ── */
@@ -389,27 +372,23 @@
       }
       return;
     }
-    if (menu.querySelector('.ds-sidebar-btn')) return;
+    if (menu.querySelector('#ds-sidebar-btn')) return;
 
     const hr = document.createElement('hr');
     hr.className = 'ds-sidebar-divider';
 
-    const btn = document.createElement('button');
-    btn.className = 'ds-sidebar-btn';
+    const btn = document.createElement('a');
+    btn.id = 'ds-sidebar-btn';
+    btn.className = 'side-nav-item';
+    btn.href = '#';
+    btn.style.cursor = 'pointer';
     btn.innerHTML = `
-      <span class="ds-sidebar-btn-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-             fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </span>
-      Switch Account
+      <span class="side-icon">👥</span>
+      <span class="side-label">Switch Account</span>
     `;
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const win = document.getElementById('ds-float-win');
       if (!win) return;
       if (win.classList.contains('ds-hidden')) {
